@@ -17,59 +17,73 @@ impl<'a> Interp<'a> {
 
     }
 
+    fn parse_command(&mut self, character: char) -> Result<(), &'static str> {
+
+        match character {
+
+            '<' => {
+
+                // Wrap to end
+                if self.ptr == 0 {
+
+                    self.ptr = self.memory.len() - 1;
+
+                } else {
+
+                    self.ptr -= 1;
+
+                }
+
+            }, // Go left in memory
+            '>' => {
+
+                // Wrap to begining
+                if self.ptr == self.memory.len() - 1{
+
+                    self.ptr = 0;
+
+                } else {
+
+                    self.ptr += 1;
+
+                }
+
+            }, // Go right in memory
+            '+' => self.memory[self.ptr] += 1, // Increment memory
+            '-' => {
+
+                // Make sure memory does not go negative
+                if self.memory[self.ptr] != 0 {
+
+                    self.memory[self.ptr] -= 1
+
+                } else {
+
+                    return Err("Tried to decrement memory to a negative value");
+
+                }
+
+            }, // Decrement memory
+            '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
+            _ => return Err("Invalid chacter"), // Not a known character return an error
+
+        }
+
+        Ok(()) // Command ran successfully
+
+    }
+
     // Runs the program through the interupreter
     pub fn run(&mut self) -> Result<(), &'static str> {
 
         // Go through every character in the code and execute its meaning
         for character in self.program.chars() {
 
-            match character {
+             // Execute the current command and return an error if any
+            let command_result = self.parse_command(character);
+            if command_result.is_err() {
 
-                '<' => {
-
-                    // Wrap to end
-                    if self.ptr == 0 {
-
-                        self.ptr = self.memory.len() - 1;
-
-                    } else {
-
-                        self.ptr -= 1;
-
-                    }
-
-                }, // Go left in memory
-                '>' => {
-
-                    // Wrap to begining
-                    if self.ptr == self.memory.len() - 1{
-
-                        self.ptr = 0;
-
-                    } else {
-
-                        self.ptr += 1;
-
-                    }
-
-                }, // Go right in memory
-                '+' => self.memory[self.ptr] += 1, // Increment memory
-                '-' => {
-
-                    // Make sure memory does not go negative
-                    if self.memory[self.ptr] != 0 {
-
-                        self.memory[self.ptr] -= 1
-
-                    } else {
-
-                        return Err("Tried to decrement memory to a negative value");
-
-                    }
-
-                }, // Decrement memory
-                '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
-                _ => return Err("Invalid chacter"), // Not a known character return an error
+                return command_result;
 
             }
 
