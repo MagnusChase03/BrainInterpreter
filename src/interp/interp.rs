@@ -25,10 +25,49 @@ impl<'a> Interp<'a> {
 
             match character {
 
-                '<' => self.ptr -= 1, // Go left in memory
-                '>' => self.ptr += 1, // Go right in memory
+                '<' => {
+
+                    // Wrap to end
+                    if self.ptr == 0 {
+
+                        self.ptr = self.memory.len() - 1;
+
+                    } else {
+
+                        self.ptr -= 1;
+
+                    }
+
+                }, // Go left in memory
+                '>' => {
+
+                    // Wrap to begining
+                    if self.ptr == self.memory.len() - 1{
+
+                        self.ptr = 0;
+
+                    } else {
+
+                        self.ptr += 1;
+
+                    }
+
+                }, // Go right in memory
                 '+' => self.memory[self.ptr] += 1, // Increment memory
-                '-' => self.memory[self.ptr] -= 1, // Decrement memory
+                '-' => {
+
+                    // Make sure memory does not go negative
+                    if self.memory[self.ptr] != 0 {
+
+                        self.memory[self.ptr] -= 1
+
+                    } else {
+
+                        return Err("Tried to decrement memory to a negative value");
+
+                    }
+
+                }, // Decrement memory
                 '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
                 _ => return Err("Invalid chacter"), // Not a known character return an error
 
