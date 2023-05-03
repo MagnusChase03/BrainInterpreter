@@ -2,7 +2,7 @@ pub struct Interp<'a> {
 
     // Memory, memory pointer, and the acutal program to run
     memory: Vec<u8>,
-    ptr: usize,
+    ptr: usize, // Change to a Box for infinite memory sizes
     program: &'a str
 
 }
@@ -90,7 +90,7 @@ impl<'a> Interp<'a> {
                 }
 
             },
-            
+
             '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
             _ => return Err("Invalid chacter"), // Not a known character return an error
 
