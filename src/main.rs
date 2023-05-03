@@ -8,8 +8,8 @@ fn main() {
     let mut program = Interp::new(2048, code);
     match program.run() {
 
-        Ok(()) => println!("Program exited successfully."),
-        Err(str) => println!("{:?}", str),
+        Ok(()) => println!("\n\nProgram exited successfully."),
+        Err(str) => println!("\n\n{:?}", str),
 
     }
 
