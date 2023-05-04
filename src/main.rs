@@ -4,7 +4,7 @@ use interp::interp::Interp;
 
 fn main() {
 
-    let code = "<.>+++++++++++++++++++++++++++++++++++++++++++++++++++++.++.>.++-.<.l";
+    let code = "<.>+++++++++++++++++++++++++++++++++++++++++++++++++++++.++.>.++-.<.,.";
     let mut program = Interp::new(2048, code);
     match program.run() {
 

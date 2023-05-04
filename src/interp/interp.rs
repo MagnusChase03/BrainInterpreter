@@ -1,3 +1,5 @@
+use std::io;
+
 pub struct Interp<'a> {
 
     // Memory, memory pointer, and the acutal program to run
@@ -70,6 +72,34 @@ impl<'a> Interp<'a> {
 
     }
 
+    fn get_input(&mut self) -> Result<(), &'static str> {
+
+        let mut buffer = String::new();
+        let stdin = io::stdin();
+
+        // Read from stdin and store the character in the memory location
+        match stdin.read_line(&mut buffer) {
+
+            Ok(_) => {
+
+                // Get the first character in the buffer and write into memory
+                match buffer.chars().nth(0) {
+
+                    Some(c) => self.memory[self.ptr] = c as u8,
+                    None => return Err("No character read into the buffer from stdin"),
+
+                }
+
+            },
+            Err(_) => return Err("Error reading from stdin"),
+
+
+        };
+
+        Ok(())
+
+    }
+
     fn parse_command(&mut self, character: char) -> Result<(), &'static str> {
 
         match character {
@@ -92,7 +122,17 @@ impl<'a> Interp<'a> {
             },
 
             '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
-            _ => return Err("Invalid chacter"), // Not a known character return an error
+            ',' => {
+
+                let command_result = self.get_input();
+                if command_result.is_err() {
+
+                    return command_result;
+
+                }
+            
+            }, // Read user input
+             _ => return Err("Invalid chacter"), // Not a known character return an error
 
         }
 
