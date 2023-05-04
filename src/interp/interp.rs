@@ -2,9 +2,10 @@ use std::io;
 
 pub struct Interp<'a> {
 
-    // Memory, memory pointer, and the acutal program to run
+    // Memory, memory pointer, program counter, and the acutal program to run
     memory: Vec<u8>,
-    ptr: usize, // Change to a Box for infinite memory sizes
+    ptr: usize,
+    pc: usize,
     program: &'a str
 
 }
@@ -15,7 +16,7 @@ impl<'a> Interp<'a> {
     // Takes in a memory size and the program code
     pub fn new(memory_size: usize, program: &'a str) -> Self {
 
-        Interp{memory: vec![0; memory_size], ptr: 0, program: program}
+        Interp{memory: vec![0; memory_size], ptr: 0, pc: 0, program: program}
 
     }
 
@@ -122,8 +123,11 @@ impl<'a> Interp<'a> {
             },
 
             '.' => print!("{:?}", self.memory[self.ptr] as char), // Print memory
+
+            // Read user input
             ',' => {
 
+                // Handle if there was an error with reading input
                 let command_result = self.get_input();
                 if command_result.is_err() {
 
@@ -131,7 +135,7 @@ impl<'a> Interp<'a> {
 
                 }
             
-            }, // Read user input
+            },
              _ => return Err("Invalid chacter"), // Not a known character return an error
 
         }
@@ -143,14 +147,28 @@ impl<'a> Interp<'a> {
     // Runs the program through the interupreter
     pub fn run(&mut self) -> Result<(), &'static str> {
 
-        // Go through every character in the code and execute its meaning
-        for character in self.program.chars() {
+        // Loop through the program until we reach the end of the program
+        while self.pc < self.program.len() {
 
-             // Execute the current command and return an error if any
-            let command_result = self.parse_command(character);
-            if command_result.is_err() {
+            // Execute the current command at program counter and return an error if any
+            match self.program.chars().nth(self.pc) {
 
-                return command_result;
+                Some(c) => {
+
+                    // Run the command at existing program counter and handle error
+                    let command_result = self.parse_command(c);
+                    if command_result.is_err() {
+
+                        return command_result;
+
+                    }
+
+                    self.pc += 1;
+
+                },
+
+                // Failed to read index, out of bounds program counter
+                None => return Err("Error trying to read character at program counter")
 
             }
 
