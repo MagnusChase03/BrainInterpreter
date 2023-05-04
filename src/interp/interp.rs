@@ -101,6 +101,92 @@ impl<'a> Interp<'a> {
 
     }
 
+    fn find_next(&mut self, character: char) -> Option<usize> {
+
+        for index in self.pc..self.memory.len() {
+
+            // Look at the nth command of the program
+            match self.program.chars().nth(index) {
+
+                // If this command is what we are looking fore return the current index
+                Some(c) => {
+
+                    if c == character {
+
+                        return Some(index);
+
+                    }
+
+                },
+                None => continue,
+
+            }
+
+        }
+
+        return None;
+
+    }
+
+    fn find_before(&mut self, character: char) -> Option<usize> {
+
+        for index in 0..self.pc {
+
+            // Look at the nth command of the program
+            match self.program.chars().nth(index) {
+
+                // If this command is what we are looking fore return the current index
+                Some(c) => {
+
+                    if c == character {
+
+                        return Some(index);
+
+                    }
+
+                },
+                None => continue,
+
+            }
+
+        }
+
+        return None;
+
+    }
+
+    fn start_loop(&mut self) -> Result<(), &'static str> {
+        
+        // If current memory is zero, go to end of loop else continue
+        if self.memory[self.ptr] == 0 {
+
+            match self.find_next(']') {
+
+                Some(index) => self.pc = index,
+                None => return Err("Cannot find end of loop"),
+
+            }
+
+        }
+
+        Ok(())
+
+    }
+
+    fn end_loop(&mut self) -> Result<(), &'static str> {
+
+        // If at end of loop go to begining
+        match self.find_before('[') {
+
+            Some(index) => self.pc = index,
+            None => return Err("Cannot find beginning of loop"),
+
+        }
+
+        Ok(())
+
+    }
+
     fn parse_command(&mut self, character: char) -> Result<(), &'static str> {
 
         match character {
@@ -136,6 +222,32 @@ impl<'a> Interp<'a> {
                 }
             
             },
+
+            // Start of a loop
+            '[' => {
+
+                // Handle if there was an error with looping
+                let command_result = self.start_loop();
+                if command_result.is_err() {
+
+                    return command_result;
+
+                }
+
+
+            },
+            ']' => {
+
+                // Handle if there was an error with looping
+                let command_result = self.end_loop();
+                if command_result.is_err() {
+
+                    return command_result;
+
+                }
+
+
+            },
              _ => return Err("Invalid chacter"), // Not a known character return an error
 
         }
@@ -163,7 +275,11 @@ impl<'a> Interp<'a> {
 
                     }
 
-                    self.pc += 1;
+                    if c != ']' {
+
+                        self.pc += 1;
+
+                    }
 
                 },
 
